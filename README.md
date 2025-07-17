@@ -1,32 +1,75 @@
 # CCR (Claude Code Router)
 
-A Cloudflare Worker proxy that enables you to use Claude models with OpenAI-compatible APIs. Simply deploy and start using Claude models through OpenRouter with your existing OpenAI client libraries.
+A Cloudflare Worker proxy that enables **Claude Code** to access OpenRouter's diverse model selection. CCR acts as a translation layer between Anthropic's Claude API format and OpenAI-compatible APIs.
 
 ## 🚀 What is CCR?
 
-CCR acts as a translation bridge that allows any application built for OpenAI's API to seamlessly work with Claude models without code changes. It automatically converts requests and responses between Anthropic and OpenAI formats.
+This Cloudflare Worker acts as a translation layer between Anthropic's Claude API format and OpenAI-compatible APIs, specifically OpenRouter. It allows **Claude Code** to access a wide range of models through OpenRouter while maintaining the familiar Claude API interface.
 
-**Perfect for:**
-- Using Claude models with OpenAI client libraries
-- Switching between OpenAI and Claude models without code changes
-- Accessing Claude models through OpenRouter
-- Building applications that support multiple AI providers
+**Key Features:**
+- 🔄 **API Translation**: Seamlessly converts between Anthropic and OpenAI API formats
+- 🌐 **OpenRouter Integration**: Access to multiple AI models through OpenRouter's unified API
+- ⚡ **Cloudflare Workers**: Fast, globally distributed proxy with minimal latency
+- 🎯 **Claude Code Compatible**: Designed specifically for Claude Code users
 
 ## ⚡ Quick Start
 
-### 1. Deploy to Cloudflare Workers
+### 1. Get OpenRouter API Key
+Sign up at [openrouter.ai](https://openrouter.ai) and get your API key
+
+### 2. Set Environment Variables
+Configure your shell with the following variables:
+
+```bash
+export ANTHROPIC_BASE_URL="https://ccr.duyet.net"
+export ANTHROPIC_API_KEY="your-openrouter-api-key"
+```
+
+### 3. Reload Shell & Start Claude Code
+```bash
+source ~/.bashrc  # or ~/.zshrc
+claude
+```
+
+That's it! Claude Code will now use OpenRouter's models through the CCR proxy.
+
+## 📥 Installation Options
+
+### Using the Install Script
+```bash
+curl -s https://ccr.duyet.net/install.sh | bash
+```
+
+### Manual Setup
+1. Add the environment variables to your shell profile:
+   ```bash
+   echo 'export ANTHROPIC_BASE_URL="https://ccr.duyet.net"' >> ~/.bashrc
+   echo 'export ANTHROPIC_API_KEY="your-openrouter-api-key"' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+
+2. Start Claude Code:
+   ```bash
+   claude
+   ```
+
+## 🔧 Self-Hosting
+
+If you want to deploy your own CCR instance:
+
+### Deploy to Cloudflare Workers
 
 ```bash
 # Install Wrangler CLI
 npm install -g wrangler
 
 # Clone and deploy
-git clone <your-repo-url>
-cd ccr
+git clone https://github.com/duyet/ccr.duyet.net.git
+cd ccr.duyet.net
 wrangler deploy
 ```
 
-### 2. Configure Authentication
+### Configure Authentication
 
 Set your OpenRouter API key:
 
@@ -35,193 +78,21 @@ wrangler secret put OPENROUTER_API_KEY
 # Enter your OpenRouter API key when prompted
 ```
 
-### 3. Start Using
+### Configure Environment Variables
 
-Replace your OpenAI base URL with your deployed worker URL:
-
-```python
-import openai
-
-client = openai.OpenAI(
-    api_key="your-openrouter-key",
-    base_url="https://your-worker.your-subdomain.workers.dev"
-)
-
-# Use Claude models with OpenAI client!
-response = client.chat.completions.create(
-    model="sonnet",
-    messages=[{"role": "user", "content": "Hello Claude!"}]
-)
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Configure via `wrangler.toml`:
+Update `wrangler.toml`:
 
 ```toml
 [vars]
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 ```
 
-### Required Secrets
+## 🔒 Security & Privacy
 
-```bash
-# Your OpenRouter API key
-wrangler secret put OPENROUTER_API_KEY
-```
-
-## 🎯 Usage Guide
-
-### Supported Models
-
-CCR automatically maps these model names to OpenRouter:
-
-| Model Name | OpenRouter ID | Description |
-|------------|---------------|-------------|
-| `haiku` | `anthropic/claude-3.5-haiku` | Fast, lightweight model |
-| `sonnet` | `anthropic/claude-sonnet-4` | Balanced performance |
-| `opus` | `anthropic/claude-opus-4` | Most capable model |
-| `kimi` or `k2` | `moonshot/kimi-k2` | Kimi AI model |
-
-You can also use full OpenRouter model IDs directly:
-- `anthropic/claude-3.5-sonnet`
-- `openai/gpt-4`
-- `meta-llama/llama-3.1-8b`
-
-### API Endpoints
-
-- `POST /v1/messages` - Chat completions (main API endpoint)
-- `GET /` - Documentation homepage
-- `GET /install.sh` - Installation script
-- `GET /terms` - Terms of service
-- `GET /privacy` - Privacy policy
-
-### Example Requests
-
-#### Python (OpenAI client)
-
-```python
-import openai
-
-client = openai.OpenAI(
-    api_key="your-openrouter-key",
-    base_url="https://your-worker.workers.dev"
-)
-
-# Simple chat
-response = client.chat.completions.create(
-    model="sonnet",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Explain quantum computing"}
-    ],
-    temperature=0.7
-)
-
-print(response.choices[0].message.content)
-
-# Streaming example
-stream = client.chat.completions.create(
-    model="sonnet",
-    messages=[{"role": "user", "content": "Count to 10"}],
-    stream=True
-)
-
-for chunk in stream:
-    if chunk.choices[0].delta.content is not None:
-        print(chunk.choices[0].delta.content, end="")
-```
-
-#### JavaScript/Node.js
-
-```javascript
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: 'your-openrouter-key',
-  baseURL: 'https://your-worker.workers.dev'
-});
-
-const response = await openai.chat.completions.create({
-  model: 'sonnet',
-  messages: [
-    { role: 'user', content: 'Write a haiku about code' }
-  ]
-});
-
-console.log(response.choices[0].message.content);
-
-// Streaming example
-const stream = await openai.chat.completions.create({
-  model: 'sonnet',
-  messages: [
-    { role: 'user', content: 'Count to 10' }
-  ],
-  stream: true
-});
-
-for await (const chunk of stream) {
-  if (chunk.choices[0].delta.content) {
-    process.stdout.write(chunk.choices[0].delta.content);
-  }
-}
-```
-
-#### cURL
-
-```bash
-curl -X POST "https://your-worker.workers.dev/v1/messages" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-openrouter-key" \
-  -d '{
-    "model": "sonnet",
-    "messages": [
-      {"role": "user", "content": "Hello Claude!"}
-    ]
-  }'
-
-# Streaming example
-curl -X POST "https://your-worker.workers.dev/v1/messages" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-openrouter-key" \
-  -d '{
-    "model": "sonnet",
-    "messages": [
-      {"role": "user", "content": "Count to 10"}
-    ],
-    "stream": true
-  }'
-```
-
-### Tool/Function Calling
-
-CCR supports tool calling with Claude models:
-
-```python
-tools = [
-    {
-        "type": "function",
-        "function": {
-            "name": "get_weather",
-            "description": "Get current weather",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "location": {"type": "string"}
-                }
-            }
-        }
-    }
-]
-
-response = client.chat.completions.create(
-    model="sonnet",
-    messages=[{"role": "user", "content": "What's the weather in NYC?"}],
-    tools=tools
-)
-```
+⚠️ **Important**: This is a proxy service. Your API key will be used to make requests to OpenRouter. Make sure to:
+- Use a secure connection
+- Keep your API key private
+- Only use trusted CCR instances
 
 ## 🛠️ Local Development
 
@@ -231,10 +102,10 @@ For testing and development:
 # Start local development server
 wrangler dev
 
-# Test locally
-curl -X POST "http://localhost:8787/v1/messages" \
-  -H "Content-Type: application/json" \
-  -d '{"model": "sonnet", "messages": [{"role": "user", "content": "Hello"}]}'
+# Test locally with Claude Code
+export ANTHROPIC_BASE_URL="http://localhost:8787"
+export ANTHROPIC_API_KEY="your-openrouter-api-key"
+claude
 ```
 
 ## 🚨 Troubleshooting
