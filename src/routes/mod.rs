@@ -1,2 +1,2 @@
-pub mod static_pages;
 pub mod proxy;
+pub mod static_pages;
