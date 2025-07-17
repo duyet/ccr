@@ -1,0 +1,13 @@
+name = "ccr"
+main = "build/worker/shim.mjs"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Enable logging
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+# Environment variables
+[vars]
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
