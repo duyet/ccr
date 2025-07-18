@@ -1,7 +1,7 @@
 use worker::*;
 
 // Module declarations
-mod config;
+pub mod config;
 pub mod models;
 mod routes;
 pub mod transform;

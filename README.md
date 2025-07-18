@@ -14,20 +14,49 @@ This Cloudflare Worker acts as a translation layer between Anthropic's Claude AP
 
 ## ⚡ Quick Start
 
-### 1. Get OpenRouter API Key
+### 1. Set up Claude Code
+Install Claude Code CLI:
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+For more details, see: https://docs.anthropic.com/en/docs/claude-code/setup
+
+### 2. Get OpenRouter API Key
 Sign up at [openrouter.ai](https://openrouter.ai) and get your API key
 
-### 2. Set Environment Variables
-Configure your shell with the following variables:
+### 3. Using Claude Code with CCR
+
+#### Basic Usage
+```bash
+# Use either ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN (both work the same way)
+ANTHROPIC_BASE_URL="https://ccr.duyet.net" ANTHROPIC_API_KEY="your-openrouter-api-key" claude
+ANTHROPIC_BASE_URL="https://ccr.duyet.net" ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key" claude
+```
+
+#### With Custom Models
+```bash
+# Use either ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN with custom models
+ANTHROPIC_BASE_URL="https://ccr.duyet.net" ANTHROPIC_API_KEY="your-openrouter-api-key" ANTHROPIC_MODEL="moonshotai/kimi-k2:free" ANTHROPIC_SMALL_FAST_MODEL="google/gemini-2.5-flash" claude
+ANTHROPIC_BASE_URL="https://ccr.duyet.net" ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key" ANTHROPIC_MODEL="moonshotai/kimi-k2:free" ANTHROPIC_SMALL_FAST_MODEL="google/gemini-2.5-flash" claude
+```
+
+#### Environment Setup (Optional)
+For permanent setup, add to your shell profile:
 
 ```bash
 export ANTHROPIC_BASE_URL="https://ccr.duyet.net"
+# Use either ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN (both work the same way)
 export ANTHROPIC_API_KEY="your-openrouter-api-key"
-```
+# OR
+export ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key"
 
-### 3. Reload Shell & Start Claude Code
-```bash
-source ~/.bashrc  # or ~/.zshrc
+# Optional: Set default models
+export ANTHROPIC_MODEL="moonshotai/kimi-k2:free"
+export ANTHROPIC_SMALL_FAST_MODEL="google/gemini-2.5-flash"
+
+# Then simply run:
 claude
 ```
 
@@ -44,7 +73,10 @@ curl -s https://ccr.duyet.net/install.sh | bash
 1. Add the environment variables to your shell profile:
    ```bash
    echo 'export ANTHROPIC_BASE_URL="https://ccr.duyet.net"' >> ~/.bashrc
+   # Use either ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN (both work the same way)
    echo 'export ANTHROPIC_API_KEY="your-openrouter-api-key"' >> ~/.bashrc
+   # OR
+   echo 'export ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key"' >> ~/.bashrc
    source ~/.bashrc
    ```
 
@@ -64,8 +96,8 @@ If you want to deploy your own CCR instance:
 npm install -g wrangler
 
 # Clone and deploy
-git clone https://github.com/duyet/ccr.duyet.net.git
-cd ccr.duyet.net
+git clone https://github.com/duyet/ccr.git
+cd ccr
 wrangler deploy
 ```
 
@@ -86,6 +118,16 @@ Update `wrangler.toml`:
 [vars]
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 ```
+
+#### How Model Selection Works
+
+CCR automatically handles model mapping:
+
+1. **OpenRouter Model IDs**: Models with `/` (like `moonshotai/kimi-k2:free`) are passed through directly
+2. **Claude Short Names**: `haiku`, `sonnet`, `opus` are mapped to their OpenRouter equivalents
+3. **Custom Models**: Any model name set via `ANTHROPIC_MODEL` environment variable is used as-is
+
+Claude Code users can override the default model using the `ANTHROPIC_MODEL` environment variable.
 
 ## 🔒 Security & Privacy
 

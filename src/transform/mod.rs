@@ -1,3 +1,4 @@
+use crate::config::Config;
 use crate::models::{AnthropicRequest, AnthropicResponse, OpenAIRequest};
 use crate::utils::map_model;
 use worker::Result;
@@ -8,7 +9,7 @@ use worker::Result;
 /// - Converting system messages to OpenAI format
 /// - Mapping Claude model names to OpenRouter model IDs
 /// - Preserving message structure and optional parameters
-pub fn anthropic_to_openai(req: &AnthropicRequest) -> Result<OpenAIRequest> {
+pub fn anthropic_to_openai(req: &AnthropicRequest, config: &Config) -> Result<OpenAIRequest> {
     let mut messages = Vec::new();
 
     // Add system message if present (OpenAI format uses system role)
@@ -24,12 +25,17 @@ pub fn anthropic_to_openai(req: &AnthropicRequest) -> Result<OpenAIRequest> {
         messages.push(message.clone());
     }
 
+    // Set reasonable max_tokens default to avoid credit limit issues
+    // If user specified max_tokens, respect it; otherwise use config default
+    let max_tokens = req.max_tokens.or(Some(config.default_max_tokens));
+
     Ok(OpenAIRequest {
-        model: map_model(&req.model),
+        model: map_model(&req.model, config),
         messages,
         temperature: req.temperature,
         tools: req.tools.clone(),
         stream: req.stream,
+        max_tokens,
     })
 }
 
@@ -258,9 +264,9 @@ async fn format_streaming_response(
 /// Formats Server-Sent Event
 fn format_sse_event<T: serde::Serialize>(event_type: &str, data: &T) -> Result<String> {
     let json_data = serde_json::to_string(data)
-        .map_err(|e| worker::Error::RustError(format!("JSON serialization error: {}", e)))?;
+        .map_err(|e| worker::Error::RustError(format!("JSON serialization error: {e}")))?;
 
-    Ok(format!("event: {}\ndata: {}\n\n", event_type, json_data))
+    Ok(format!("event: {event_type}\ndata: {json_data}\n\n"))
 }
 
 /// Processes streaming delta from OpenAI and generates Anthropic events
@@ -403,8 +409,16 @@ mod tests {
     use super::*;
     use serde_json::json;
 
+    fn default_config() -> Config {
+        Config {
+            openrouter_base_url: "https://openrouter.ai/api/v1".to_string(),
+            default_max_tokens: 4096,
+        }
+    }
+
     #[test]
     fn test_anthropic_to_openai_basic() {
+        let config = default_config();
         let anthropic_req = AnthropicRequest {
             model: "claude-3-sonnet-20240229".to_string(),
             messages: vec![json!({
@@ -415,9 +429,10 @@ mod tests {
             temperature: Some(0.7),
             tools: None,
             stream: Some(false),
+            max_tokens: None,
         };
 
-        let result = anthropic_to_openai(&anthropic_req).unwrap();
+        let result = anthropic_to_openai(&anthropic_req, &config).unwrap();
 
         assert_eq!(result.model, "anthropic/claude-sonnet-4");
         assert_eq!(result.messages.len(), 1);
@@ -427,6 +442,7 @@ mod tests {
 
     #[test]
     fn test_anthropic_to_openai_with_system() {
+        let config = default_config();
         let anthropic_req = AnthropicRequest {
             model: "claude-3-haiku-20240307".to_string(),
             messages: vec![json!({
@@ -437,9 +453,10 @@ mod tests {
             temperature: None,
             tools: None,
             stream: None,
+            max_tokens: None,
         };
 
-        let result = anthropic_to_openai(&anthropic_req).unwrap();
+        let result = anthropic_to_openai(&anthropic_req, &config).unwrap();
 
         assert_eq!(result.model, "anthropic/claude-3.5-haiku");
         assert_eq!(result.messages.len(), 2);
@@ -450,6 +467,7 @@ mod tests {
 
     #[test]
     fn test_anthropic_to_openai_with_tools() {
+        let config = default_config();
         let tools = vec![json!({
             "type": "function",
             "function": {
@@ -468,9 +486,10 @@ mod tests {
             temperature: Some(0.5),
             tools: Some(tools.clone()),
             stream: Some(false),
+            max_tokens: None,
         };
 
-        let result = anthropic_to_openai(&anthropic_req).unwrap();
+        let result = anthropic_to_openai(&anthropic_req, &config).unwrap();
 
         assert_eq!(result.model, "anthropic/claude-opus-4");
         assert_eq!(result.tools, Some(tools));

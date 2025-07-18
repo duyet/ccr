@@ -17,8 +17,6 @@ jobs:
       matrix:
         rust:
           - stable
-          - beta
-          - nightly
     steps:
     - uses: actions/checkout@v4
     
@@ -91,3 +89,4 @@ jobs:
       with:
         files: lcov.info
         fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}

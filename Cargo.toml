@@ -1,8 +1,11 @@
 [package]
 name = "ccr"
+description = "A Cloudflare Worker proxy that enables Claude Code to access OpenRouter's diverse model selection"
+repository = "https://github.com/duyet/ccr.git"
 version = "0.1.0"
 edition = "2021"
 authors = ["Duyet Le <me@duyet.net>", "Claude Code"]
+license = "MIT"
 
 [lib]
 crate-type = ["cdylib", "lib"]
@@ -14,6 +17,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 bytes = "1.0"
 futures = "0.3"
+web-sys = "0.3"
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["full"] }

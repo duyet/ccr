@@ -2,6 +2,7 @@ use worker::{Env, Result};
 
 pub struct Config {
     pub openrouter_base_url: String,
+    pub default_max_tokens: u32,
 }
 
 impl Config {
@@ -12,8 +13,17 @@ impl Config {
             .map(|v| v.to_string())
             .unwrap_or_else(|| "https://openrouter.ai/api/v1".to_string());
 
+        let default_max_tokens = env
+            .var("DEFAULT_MAX_TOKENS")
+            .ok()
+            .map(|v| v.to_string())
+            .unwrap_or_else(|| "4096".to_string())
+            .parse()
+            .unwrap_or(4096);
+
         Ok(Config {
             openrouter_base_url,
+            default_max_tokens,
         })
     }
 
@@ -21,6 +31,7 @@ impl Config {
     pub fn new(openrouter_base_url: String) -> Self {
         Config {
             openrouter_base_url,
+            default_max_tokens: 4096,
         }
     }
 }
