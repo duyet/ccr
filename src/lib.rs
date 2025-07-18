@@ -64,7 +64,6 @@ async fn handle_request_with_monitoring(req: Request, env: Env, _ctx: Context, s
         ("/", Method::Get) => routes::static_pages::home().await,
         ("/terms", Method::Get) => routes::static_pages::terms().await,
         ("/privacy", Method::Get) => routes::static_pages::privacy().await,
-        ("/install.sh", Method::Get) => routes::static_pages::install_sh().await,
 
         // Main API endpoint - translates Anthropic format to OpenAI format
         ("/v1/messages", Method::Post) => {

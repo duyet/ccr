@@ -64,7 +64,7 @@ claude
 
 That's it! Claude Code will now use OpenRouter's models through the CCR proxy.
 
-## 📥 Installation Options
+## 📥 Installation
 
 ### Manual Setup
 1. Add the environment variables to your shell profile:

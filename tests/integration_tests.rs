@@ -15,7 +15,6 @@ mod integration_tests {
             ("/", "GET"),
             ("/terms", "GET"),
             ("/privacy", "GET"),
-            ("/install.sh", "GET"),
             ("/v1/messages", "POST"),
         ];
 
