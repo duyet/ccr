@@ -30,19 +30,15 @@ Sign up at [openrouter.ai](https://openrouter.ai) and get your API key
 
 #### Basic Usage
 ```bash
-# Option 1: Using ANTHROPIC_API_KEY
+# Use either ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN (both work the same way)
 ANTHROPIC_BASE_URL="https://ccr.duyet.net" ANTHROPIC_API_KEY="your-openrouter-api-key" claude
-
-# Option 2: Using ANTHROPIC_AUTH_TOKEN (alternative)
 ANTHROPIC_BASE_URL="https://ccr.duyet.net" ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key" claude
 ```
 
 #### With Custom Models
 ```bash
-# Using ANTHROPIC_API_KEY
+# Use either ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN with custom models
 ANTHROPIC_BASE_URL="https://ccr.duyet.net" ANTHROPIC_API_KEY="your-openrouter-api-key" ANTHROPIC_MODEL="moonshotai/kimi-k2:free" ANTHROPIC_SMALL_FAST_MODEL="google/gemini-2.5-flash" claude
-
-# Using ANTHROPIC_AUTH_TOKEN
 ANTHROPIC_BASE_URL="https://ccr.duyet.net" ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key" ANTHROPIC_MODEL="moonshotai/kimi-k2:free" ANTHROPIC_SMALL_FAST_MODEL="google/gemini-2.5-flash" claude
 ```
 
@@ -51,7 +47,7 @@ For permanent setup, add to your shell profile:
 
 ```bash
 export ANTHROPIC_BASE_URL="https://ccr.duyet.net"
-# Choose one of these API key options:
+# Use either ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN (both work the same way)
 export ANTHROPIC_API_KEY="your-openrouter-api-key"
 # OR
 export ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key"
@@ -77,7 +73,7 @@ curl -s https://ccr.duyet.net/install.sh | bash
 1. Add the environment variables to your shell profile:
    ```bash
    echo 'export ANTHROPIC_BASE_URL="https://ccr.duyet.net"' >> ~/.bashrc
-   # Choose one:
+   # Use either ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN (both work the same way)
    echo 'export ANTHROPIC_API_KEY="your-openrouter-api-key"' >> ~/.bashrc
    # OR
    echo 'export ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key"' >> ~/.bashrc
@@ -100,8 +96,8 @@ If you want to deploy your own CCR instance:
 npm install -g wrangler
 
 # Clone and deploy
-git clone https://github.com/duyet/ccr.duyet.net.git
-cd ccr.duyet.net
+git clone https://github.com/duyet/ccr.git
+cd ccr
 wrangler deploy
 ```
 

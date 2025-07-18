@@ -86,24 +86,24 @@ pub async fn home() -> Result<Response> {
                             <div class="space-y-4">
                                 <div>
                                     <h4 class="font-semibold text-gray-900 mb-2">Basic Usage</h4>
-                                    <p class="text-sm text-gray-600 mb-2">Option 1: Using ANTHROPIC_API_KEY</p>
-                                    <pre class="bg-gray-800 text-gray-100 p-3 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap break-all mb-3">ANTHROPIC_BASE_URL="https://ccr.duyet.net" \
-ANTHROPIC_API_KEY="your-openrouter-api-key" \
-claude</pre>
-                                    <p class="text-sm text-gray-600 mb-2">Option 2: Using ANTHROPIC_AUTH_TOKEN</p>
+                                    <p class="text-sm text-gray-600 mb-2">Use either ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN (both work the same way)</p>
                                     <pre class="bg-gray-800 text-gray-100 p-3 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap break-all">ANTHROPIC_BASE_URL="https://ccr.duyet.net" \
+ANTHROPIC_API_KEY="your-openrouter-api-key" \
+claude
+
+ANTHROPIC_BASE_URL="https://ccr.duyet.net" \
 ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key" \
 claude</pre>
                                 </div>
                                 <div>
                                     <h4 class="font-semibold text-gray-900 mb-2">With Custom Models</h4>
-                                    <p class="text-sm text-gray-600 mb-2">Using ANTHROPIC_API_KEY</p>
-                                    <pre class="bg-gray-800 text-gray-100 p-3 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap break-all mb-3">ANTHROPIC_BASE_URL="https://ccr.duyet.net" \
+                                    <p class="text-sm text-gray-600 mb-2">Use either ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN with custom models</p>
+                                    <pre class="bg-gray-800 text-gray-100 p-3 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap break-all">ANTHROPIC_BASE_URL="https://ccr.duyet.net" \
 ANTHROPIC_API_KEY="your-openrouter-api-key" \
 ANTHROPIC_MODEL="moonshotai/kimi-k2:free" \
-claude</pre>
-                                    <p class="text-sm text-gray-600 mb-2">Using ANTHROPIC_AUTH_TOKEN</p>
-                                    <pre class="bg-gray-800 text-gray-100 p-3 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap break-all">ANTHROPIC_BASE_URL="https://ccr.duyet.net" \
+claude
+
+ANTHROPIC_BASE_URL="https://ccr.duyet.net" \
 ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key" \
 ANTHROPIC_MODEL="moonshotai/kimi-k2:free" \
 claude</pre>
@@ -476,7 +476,7 @@ echo -e "${BLUE}Adding environment variables...${NC}"
 echo "" >> "$SHELL_CONFIG"
 echo "# CCR - Claude Code Router configuration" >> "$SHELL_CONFIG"
 echo "export ANTHROPIC_BASE_URL=\"https://ccr.duyet.net\"" >> "$SHELL_CONFIG"
-# Choose one:
+# Use either ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN (both work the same way)
 echo "export ANTHROPIC_API_KEY=\"$OPENROUTER_API_KEY\"" >> "$SHELL_CONFIG"
 # OR
 echo "export ANTHROPIC_AUTH_TOKEN=\"$OPENROUTER_API_KEY\"" >> "$SHELL_CONFIG"

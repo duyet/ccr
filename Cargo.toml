@@ -1,7 +1,7 @@
 [package]
 name = "ccr"
 description = "A Cloudflare Worker proxy that enables Claude Code to access OpenRouter's diverse model selection"
-repository = "https://github.com/duyet/ccr.duyet.net"
+repository = "https://github.com/duyet/ccr.git"
 version = "0.1.0"
 edition = "2021"
 authors = ["Duyet Le <me@duyet.net>", "Claude Code"]

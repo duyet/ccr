@@ -22,7 +22,9 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
     } else if let Some(auth_header) = req.headers().get("Authorization")? {
         auth_header
             .strip_prefix("Bearer ")
-            .ok_or_else(|| worker::Error::RustError("Invalid Authorization header format".to_string()))?
+            .ok_or_else(|| {
+                worker::Error::RustError("Invalid Authorization header format".to_string())
+            })?
             .to_string()
     } else {
         return Response::error("No API key found in x-api-key or Authorization header", 401);
@@ -30,10 +32,16 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
 
     // Parse incoming Anthropic-formatted request
     let anthropic_request: AnthropicRequest = req.json().await?;
-    
+
     // Debug: Log the received model name (only in WASM environment)
     #[cfg(target_arch = "wasm32")]
-    web_sys::console::log_1(&format!("Received model from Claude Code: {}", anthropic_request.model).into());
+    web_sys::console::log_1(
+        &format!(
+            "Received model from Claude Code: {}",
+            anthropic_request.model
+        )
+        .into(),
+    );
 
     // Transform to OpenAI format for OpenRouter API
     let openai_request = anthropic_to_openai(&anthropic_request, config)?;
@@ -55,7 +63,14 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
     {
         web_sys::console::log_1(&format!("Request URL: {}", url).into());
         web_sys::console::log_1(&format!("Request model: {}", openai_request.model).into());
-        web_sys::console::log_1(&format!("Request body: {}", serde_json::to_string(&openai_request).unwrap_or_else(|_| "Failed to serialize".to_string())).into());
+        web_sys::console::log_1(
+            &format!(
+                "Request body: {}",
+                serde_json::to_string(&openai_request)
+                    .unwrap_or_else(|_| "Failed to serialize".to_string())
+            )
+            .into(),
+        );
         web_sys::console::log_1(&format!("API key length: {}", api_key.len()).into());
     }
 
@@ -81,17 +96,18 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
     // Handle error responses from OpenRouter
     if !response.status().is_success() {
         let status = response.status().as_u16();
-        let text = response.text().await.map_err(|e| {
-            worker::Error::RustError(format!("Failed to read error response: {e}"))
-        })?;
-        
+        let text = response
+            .text()
+            .await
+            .map_err(|e| worker::Error::RustError(format!("Failed to read error response: {e}")))?;
+
         // Log error details for debugging
         #[cfg(target_arch = "wasm32")]
         {
             web_sys::console::log_1(&format!("OpenRouter error status: {}", status).into());
             web_sys::console::log_1(&format!("OpenRouter error response: {}", text).into());
         }
-        
+
         return Response::error(text, status);
     }
 

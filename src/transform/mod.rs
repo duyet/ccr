@@ -1,6 +1,6 @@
+use crate::config::Config;
 use crate::models::{AnthropicRequest, AnthropicResponse, OpenAIRequest};
 use crate::utils::map_model;
-use crate::config::Config;
 use worker::Result;
 
 /// Transforms an Anthropic API request to OpenAI API format

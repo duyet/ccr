@@ -17,11 +17,13 @@ pub fn map_model(anthropic_model: &str, _config: &Config) -> String {
     // Debug logging (only in WASM environment)
     #[cfg(target_arch = "wasm32")]
     web_sys::console::log_1(&format!("map_model input: '{}'", anthropic_model).into());
-    
+
     // If model already contains '/', it's an OpenRouter model ID - return as-is
     if anthropic_model.contains('/') {
         #[cfg(target_arch = "wasm32")]
-        web_sys::console::log_1(&format!("Found '/' in model, returning as-is: '{}'", anthropic_model).into());
+        web_sys::console::log_1(
+            &format!("Found '/' in model, returning as-is: '{}'", anthropic_model).into(),
+        );
         return anthropic_model.to_string();
     }
 
@@ -31,25 +33,37 @@ pub fn map_model(anthropic_model: &str, _config: &Config) -> String {
 
     // Map common Claude short names to full OpenRouter model IDs
     // Only match exact names or standard Claude model patterns
-    let result = if model_lower == "haiku" || model_lower.starts_with("claude-3") && model_lower.contains("haiku") {
+    let result = if model_lower == "haiku"
+        || model_lower.starts_with("claude-3") && model_lower.contains("haiku")
+    {
         #[cfg(target_arch = "wasm32")]
         web_sys::console::log_1(&"Mapping haiku -> anthropic/claude-3.5-haiku".into());
         "anthropic/claude-3.5-haiku".to_string()
-    } else if model_lower == "sonnet" || model_lower.starts_with("claude-3") && model_lower.contains("sonnet") {
+    } else if model_lower == "sonnet"
+        || model_lower.starts_with("claude-3") && model_lower.contains("sonnet")
+    {
         #[cfg(target_arch = "wasm32")]
         web_sys::console::log_1(&"Mapping sonnet -> anthropic/claude-sonnet-4".into());
         "anthropic/claude-sonnet-4".to_string()
-    } else if model_lower == "opus" || model_lower.starts_with("claude-3") && model_lower.contains("opus") {
+    } else if model_lower == "opus"
+        || model_lower.starts_with("claude-3") && model_lower.contains("opus")
+    {
         #[cfg(target_arch = "wasm32")]
         web_sys::console::log_1(&"Mapping opus -> anthropic/claude-opus-4".into());
         "anthropic/claude-opus-4".to_string()
     } else {
         #[cfg(target_arch = "wasm32")]
-        web_sys::console::log_1(&format!("No mapping found, returning unchanged: '{}'", anthropic_model).into());
+        web_sys::console::log_1(
+            &format!(
+                "No mapping found, returning unchanged: '{}'",
+                anthropic_model
+            )
+            .into(),
+        );
         // Return unknown models unchanged - Claude Code will set ANTHROPIC_MODEL
         anthropic_model.to_string()
     };
-    
+
     #[cfg(target_arch = "wasm32")]
     web_sys::console::log_1(&format!("map_model output: '{}'", result).into());
     result
@@ -73,7 +87,10 @@ mod tests {
             map_model("claude-3-haiku-20240307", &config),
             "anthropic/claude-3.5-haiku"
         );
-        assert_eq!(map_model("claude-3.5-haiku", &config), "anthropic/claude-3.5-haiku");
+        assert_eq!(
+            map_model("claude-3.5-haiku", &config),
+            "anthropic/claude-3.5-haiku"
+        );
         assert_eq!(map_model("haiku", &config), "anthropic/claude-3.5-haiku");
     }
 
@@ -84,7 +101,10 @@ mod tests {
             map_model("claude-3-sonnet-20240229", &config),
             "anthropic/claude-sonnet-4"
         );
-        assert_eq!(map_model("claude-3.5-sonnet", &config), "anthropic/claude-sonnet-4");
+        assert_eq!(
+            map_model("claude-3.5-sonnet", &config),
+            "anthropic/claude-sonnet-4"
+        );
         assert_eq!(map_model("sonnet", &config), "anthropic/claude-sonnet-4");
     }
 
@@ -95,7 +115,10 @@ mod tests {
             map_model("claude-3-opus-20240229", &config),
             "anthropic/claude-opus-4"
         );
-        assert_eq!(map_model("claude-3.5-opus", &config), "anthropic/claude-opus-4");
+        assert_eq!(
+            map_model("claude-3.5-opus", &config),
+            "anthropic/claude-opus-4"
+        );
         assert_eq!(map_model("opus", &config), "anthropic/claude-opus-4");
     }
 
@@ -139,22 +162,36 @@ mod tests {
         assert_eq!(map_model("my-haiku-model", &config), "my-haiku-model");
         assert_eq!(map_model("sonnet-variant", &config), "sonnet-variant");
         assert_eq!(map_model("opus-custom", &config), "opus-custom");
-        
-        // But these should match because they follow Claude patterns
-        assert_eq!(map_model("claude-3-haiku-20240307", &config), "anthropic/claude-3.5-haiku");
-        assert_eq!(map_model("claude-3-sonnet-20240229", &config), "anthropic/claude-sonnet-4");
-        assert_eq!(map_model("claude-3-opus-20240229", &config), "anthropic/claude-opus-4");
-    }
 
+        // But these should match because they follow Claude patterns
+        assert_eq!(
+            map_model("claude-3-haiku-20240307", &config),
+            "anthropic/claude-3.5-haiku"
+        );
+        assert_eq!(
+            map_model("claude-3-sonnet-20240229", &config),
+            "anthropic/claude-sonnet-4"
+        );
+        assert_eq!(
+            map_model("claude-3-opus-20240229", &config),
+            "anthropic/claude-opus-4"
+        );
+    }
 
     #[test]
     fn test_map_model_passthrough() {
         let config = default_config();
-        
+
         // Should pass through OpenRouter model IDs unchanged
-        assert_eq!(map_model("moonshotai/kimi-k2:free", &config), "moonshotai/kimi-k2:free");
-        assert_eq!(map_model("google/gemini-2.5-flash", &config), "google/gemini-2.5-flash");
-        
+        assert_eq!(
+            map_model("moonshotai/kimi-k2:free", &config),
+            "moonshotai/kimi-k2:free"
+        );
+        assert_eq!(
+            map_model("google/gemini-2.5-flash", &config),
+            "google/gemini-2.5-flash"
+        );
+
         // Should pass through unknown models unchanged
         assert_eq!(map_model("unknown-model", &config), "unknown-model");
         assert_eq!(map_model("custom-model-name", &config), "custom-model-name");
@@ -163,20 +200,35 @@ mod tests {
     #[test]
     fn test_anthropic_model_env_var_simulation() {
         let config = default_config();
-        
+
         // Test the exact models a user might set in ANTHROPIC_MODEL
-        assert_eq!(map_model("moonshotai/kimi-k2:free", &config), "moonshotai/kimi-k2:free");
-        assert_eq!(map_model("google/gemini-2.5-flash", &config), "google/gemini-2.5-flash");
-        assert_eq!(map_model("openai/gpt-4o-mini", &config), "openai/gpt-4o-mini");
-        assert_eq!(map_model("anthropic/claude-3-opus-20240229", &config), "anthropic/claude-3-opus-20240229");
-        
+        assert_eq!(
+            map_model("moonshotai/kimi-k2:free", &config),
+            "moonshotai/kimi-k2:free"
+        );
+        assert_eq!(
+            map_model("google/gemini-2.5-flash", &config),
+            "google/gemini-2.5-flash"
+        );
+        assert_eq!(
+            map_model("openai/gpt-4o-mini", &config),
+            "openai/gpt-4o-mini"
+        );
+        assert_eq!(
+            map_model("anthropic/claude-3-opus-20240229", &config),
+            "anthropic/claude-3-opus-20240229"
+        );
+
         // Test that short names still get mapped for backward compatibility
         assert_eq!(map_model("haiku", &config), "anthropic/claude-3.5-haiku");
         assert_eq!(map_model("sonnet", &config), "anthropic/claude-sonnet-4");
         assert_eq!(map_model("opus", &config), "anthropic/claude-opus-4");
-        
+
         // Ensure no false matches
         assert_eq!(map_model("not-haiku-model", &config), "not-haiku-model");
-        assert_eq!(map_model("some-sonnet-variant", &config), "some-sonnet-variant");
+        assert_eq!(
+            map_model("some-sonnet-variant", &config),
+            "some-sonnet-variant"
+        );
     }
 }

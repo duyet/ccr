@@ -65,7 +65,8 @@ mod e2e_tests {
 
         // Transform to OpenAI format
         let config = default_config();
-        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
+        let openai_request =
+            ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
 
         // Verify transformation
         assert_eq!(openai_request.model, "anthropic/claude-sonnet-4");
@@ -170,7 +171,8 @@ mod e2e_tests {
 
         // Transform to OpenAI format
         let config = default_config();
-        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
+        let openai_request =
+            ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
 
         // Verify tools are included
         assert!(openai_request.tools.is_some());
@@ -232,7 +234,8 @@ mod e2e_tests {
         };
 
         let config = default_config();
-        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
+        let openai_request =
+            ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
 
         // Simulate API call with invalid key
         let client = reqwest::Client::new();
@@ -315,11 +318,12 @@ mod e2e_tests {
                 temperature: None,
                 tools: None,
                 stream: Some(false),
-            max_tokens: None,
+                max_tokens: None,
             };
 
             let config = default_config();
-        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
+            let openai_request =
+                ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
             assert_eq!(openai_request.model, expected_openai_model);
         }
     }
@@ -364,7 +368,8 @@ mod e2e_tests {
         };
 
         let config = default_config();
-        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
+        let openai_request =
+            ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
 
         // Verify the transformation handles large content
         assert_eq!(openai_request.messages.len(), 1);
@@ -377,7 +382,7 @@ mod e2e_tests {
         );
     }
 
-    #[tokio::test] 
+    #[tokio::test]
     async fn test_real_api_flow_simulation() {
         // This test simulates the complete flow: CCR -> OpenRouter (mock)
         let mock_server = MockServer::start().await;
@@ -389,7 +394,7 @@ mod e2e_tests {
             .and(header("content-type", "application/json"))
             .respond_with(ResponseTemplate::new(200).set_body_json(json!({
                 "id": "chatcmpl-real-test",
-                "object": "chat.completion", 
+                "object": "chat.completion",
                 "created": 1703000000,
                 "model": "moonshotai/kimi-k2:free",
                 "choices": [{
@@ -419,7 +424,7 @@ mod e2e_tests {
         let anthropic_request = ccr::models::AnthropicRequest {
             model: "moonshotai/kimi-k2:free".to_string(),
             messages: vec![json!({
-                "role": "user", 
+                "role": "user",
                 "content": "Hello, please respond to test the proxy"
             })],
             system: None,
@@ -431,7 +436,8 @@ mod e2e_tests {
 
         // Test transformation and HTTP flow
         let config_ref = &config;
-        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request, config_ref).unwrap();
+        let openai_request =
+            ccr::transform::anthropic_to_openai(&anthropic_request, config_ref).unwrap();
 
         // Verify model pass-through works correctly
         assert_eq!(openai_request.model, "moonshotai/kimi-k2:free");
@@ -459,9 +465,11 @@ mod e2e_tests {
         assert_eq!(response.status(), 200);
 
         let openai_response: serde_json::Value = response.json().await.unwrap();
-        
+
         // Transform response back to Anthropic format
-        let anthropic_response = ccr::transform::openai_to_anthropic(&openai_response, &anthropic_request.model).unwrap();
+        let anthropic_response =
+            ccr::transform::openai_to_anthropic(&openai_response, &anthropic_request.model)
+                .unwrap();
 
         // Verify final response structure
         assert_eq!(anthropic_response.response_type, "message");
@@ -469,7 +477,10 @@ mod e2e_tests {
         assert_eq!(anthropic_response.model, "moonshotai/kimi-k2:free");
         assert_eq!(anthropic_response.content.len(), 1);
         assert_eq!(anthropic_response.content[0]["type"], "text");
-        assert_eq!(anthropic_response.content[0]["text"], "Hello! I'm responding through CCR proxy. The test is working!");
+        assert_eq!(
+            anthropic_response.content[0]["text"],
+            "Hello! I'm responding through CCR proxy. The test is working!"
+        );
         assert_eq!(anthropic_response.stop_reason, Some("end_turn".to_string()));
     }
 
@@ -481,9 +492,11 @@ mod e2e_tests {
         // Create a slow response (5 second delay)
         Mock::given(method("POST"))
             .and(path("/chat/completions"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_delay(std::time::Duration::from_secs(5))
-                .set_body_json(json!({"error": "timeout"})))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_delay(std::time::Duration::from_secs(5))
+                    .set_body_json(json!({"error": "timeout"})),
+            )
             .mount(&mock_server)
             .await;
 
@@ -550,7 +563,7 @@ mod e2e_tests {
                     temperature: Some(0.7),
                     tools: None,
                     stream: Some(false),
-            max_tokens: None,
+                    max_tokens: None,
                 };
 
                 let config = default_config();
