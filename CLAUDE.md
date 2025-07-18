@@ -52,7 +52,7 @@ cargo build --release
 ### Cloudflare Worker Deployment
 ```bash
 # Deploy to Cloudflare Workers
-wrangler publish
+wrangler deploy
 
 # Test locally (requires wrangler)
 wrangler dev

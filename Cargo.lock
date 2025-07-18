@@ -139,6 +139,7 @@ dependencies = [
  "tokio",
  "tokio-test",
  "uuid",
+ "web-sys",
  "wiremock",
  "worker",
 ]

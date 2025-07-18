@@ -8,6 +8,7 @@ pub struct AnthropicRequest {
     pub temperature: Option<f32>,
     pub tools: Option<Vec<serde_json::Value>>,
     pub stream: Option<bool>,
+    pub max_tokens: Option<u32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -29,6 +30,7 @@ pub struct OpenAIRequest {
     pub temperature: Option<f32>,
     pub tools: Option<Vec<serde_json::Value>>,
     pub stream: Option<bool>,
+    pub max_tokens: Option<u32>,
 }
 
 /// Streaming event models for Anthropic format
