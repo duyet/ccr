@@ -14,58 +14,35 @@ use crate::config::Config;
 /// # Returns
 /// The OpenRouter-compatible model identifier
 pub fn map_model(anthropic_model: &str, _config: &Config) -> String {
-    // Debug logging (only in WASM environment)
-    #[cfg(target_arch = "wasm32")]
-    web_sys::console::log_1(&format!("map_model input: '{}'", anthropic_model).into());
+    // Removed debug logging to reduce CPU usage
 
     // If model already contains '/', it's an OpenRouter model ID - return as-is
     if anthropic_model.contains('/') {
-        #[cfg(target_arch = "wasm32")]
-        web_sys::console::log_1(
-            &format!("Found '/' in model, returning as-is: '{}'", anthropic_model).into(),
-        );
         return anthropic_model.to_string();
     }
 
     let model_lower = anthropic_model.to_lowercase();
-    #[cfg(target_arch = "wasm32")]
-    web_sys::console::log_1(&format!("Model lowercased: '{}'", model_lower).into());
 
     // Map common Claude short names to full OpenRouter model IDs
     // Only match exact names or standard Claude model patterns
     let result = if model_lower == "haiku"
         || model_lower.starts_with("claude-3") && model_lower.contains("haiku")
     {
-        #[cfg(target_arch = "wasm32")]
-        web_sys::console::log_1(&"Mapping haiku -> anthropic/claude-3.5-haiku".into());
         "anthropic/claude-3.5-haiku".to_string()
     } else if model_lower == "sonnet"
         || model_lower.starts_with("claude-3") && model_lower.contains("sonnet")
+        || model_lower.starts_with("claude-sonnet-4")
     {
-        #[cfg(target_arch = "wasm32")]
-        web_sys::console::log_1(&"Mapping sonnet -> anthropic/claude-sonnet-4".into());
         "anthropic/claude-sonnet-4".to_string()
     } else if model_lower == "opus"
         || model_lower.starts_with("claude-3") && model_lower.contains("opus")
     {
-        #[cfg(target_arch = "wasm32")]
-        web_sys::console::log_1(&"Mapping opus -> anthropic/claude-opus-4".into());
         "anthropic/claude-opus-4".to_string()
     } else {
-        #[cfg(target_arch = "wasm32")]
-        web_sys::console::log_1(
-            &format!(
-                "No mapping found, returning unchanged: '{}'",
-                anthropic_model
-            )
-            .into(),
-        );
         // Return unknown models unchanged - Claude Code will set ANTHROPIC_MODEL
         anthropic_model.to_string()
     };
 
-    #[cfg(target_arch = "wasm32")]
-    web_sys::console::log_1(&format!("map_model output: '{}'", result).into());
     result
 }
 
@@ -103,6 +80,14 @@ mod tests {
         );
         assert_eq!(
             map_model("claude-3.5-sonnet", &config),
+            "anthropic/claude-sonnet-4"
+        );
+        assert_eq!(
+            map_model("claude-sonnet-4-20250514", &config),
+            "anthropic/claude-sonnet-4"
+        );
+        assert_eq!(
+            map_model("claude-sonnet-4-20241120", &config),
             "anthropic/claude-sonnet-4"
         );
         assert_eq!(map_model("sonnet", &config), "anthropic/claude-sonnet-4");

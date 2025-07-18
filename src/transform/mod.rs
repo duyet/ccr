@@ -10,6 +10,10 @@ use worker::Result;
 /// - Mapping Claude model names to OpenRouter model IDs
 /// - Preserving message structure and optional parameters
 pub fn anthropic_to_openai(req: &AnthropicRequest, config: &Config) -> Result<OpenAIRequest> {
+    // Minimal debug logging
+    #[cfg(target_arch = "wasm32")]
+    web_sys::console::log_1(&format!("Transform: {} msgs", req.messages.len()).into());
+
     let mut messages = Vec::new();
 
     // Add system message if present (OpenAI format uses system role)
@@ -20,23 +24,68 @@ pub fn anthropic_to_openai(req: &AnthropicRequest, config: &Config) -> Result<Op
         }));
     }
 
-    // Convert messages (simplified version - assumes compatible format)
-    for message in &req.messages {
-        messages.push(message.clone());
+    // Convert messages from Anthropic format to OpenAI format
+    for message in req.messages.iter() {
+
+        let mut openai_message = serde_json::Map::new();
+
+        // Copy role
+        if let Some(role) = message.get("role") {
+            openai_message.insert("role".to_string(), role.clone());
+        }
+
+        // Convert content from Anthropic array format to OpenAI string format
+        if let Some(content) = message.get("content") {
+            if let Some(content_array) = content.as_array() {
+                // Extract text from Anthropic content array
+                let mut text_content = String::new();
+                for item in content_array {
+                    if let Some(text) = item.get("text") {
+                        if let Some(text_str) = text.as_str() {
+                            text_content.push_str(text_str);
+                        }
+                    }
+                }
+                
+                openai_message.insert(
+                    "content".to_string(),
+                    serde_json::Value::String(text_content),
+                );
+            } else if let Some(content_str) = content.as_str() {
+                // Already a string, use as-is
+                openai_message.insert(
+                    "content".to_string(),
+                    serde_json::Value::String(content_str.to_string()),
+                );
+            }
+        }
+
+        let converted_message = serde_json::Value::Object(openai_message);
+        messages.push(converted_message);
     }
 
     // Set reasonable max_tokens default to avoid credit limit issues
     // If user specified max_tokens, respect it; otherwise use config default
     let max_tokens = req.max_tokens.or(Some(config.default_max_tokens));
 
-    Ok(OpenAIRequest {
-        model: map_model(&req.model, config),
+    let mapped_model = map_model(&req.model, config);
+
+    // Minimal debug logging
+    #[cfg(target_arch = "wasm32")]
+    web_sys::console::log_1(&format!("→ {}", mapped_model).into());
+
+    let openai_request = OpenAIRequest {
+        model: mapped_model,
         messages,
         temperature: req.temperature,
         tools: req.tools.clone(),
         stream: req.stream,
         max_tokens,
-    })
+    };
+
+    // Removed detailed debugging to reduce CPU usage
+
+    Ok(openai_request)
 }
 
 /// Transforms an OpenAI API response back to Anthropic API format
@@ -47,17 +96,29 @@ pub fn anthropic_to_openai(req: &AnthropicRequest, config: &Config) -> Result<Op
 /// - Mapping OpenAI finish_reason to Anthropic stop_reason
 /// - Generating Anthropic-compatible message IDs
 pub fn openai_to_anthropic(response: &serde_json::Value, model: &str) -> Result<AnthropicResponse> {
+    // Debug logging removed for performance
+
     // Generate a timestamp-based message ID in Anthropic format
     let message_id = format!(
         "msg_{}",
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
+            .map_err(|e| worker::Error::RustError(format!("Time error: {}", e)))?
             .as_millis()
     );
 
-    let choice = response["choices"][0].clone();
+    // Safe array access with bounds checking
+    let choices = response["choices"].as_array()
+        .ok_or_else(|| worker::Error::RustError("Response missing choices array".to_string()))?;
+    
+    if choices.is_empty() {
+        return Err(worker::Error::RustError("Response has empty choices array".to_string()));
+    }
+    
+    let choice = choices[0].clone();
     let message = choice["message"].clone();
+
+    // Debug logging removed for performance
 
     // Convert content based on response type
     let content = if let Some(content_str) = message["content"].as_str() {
@@ -134,7 +195,7 @@ pub async fn stream_openai_to_anthropic(
         "msg_{}",
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
+            .map_err(|e| worker::Error::RustError(format!("Time error: {}", e)))?
             .as_millis()
     );
 

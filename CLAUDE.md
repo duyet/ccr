@@ -67,8 +67,6 @@ wrangler dev
 ## Important Notes
 
 ### Current Limitations
-- **Streaming not implemented**: The `/v1/messages` endpoint returns a 501 error for streaming requests
-- **Hardcoded token**: Bearer token is currently hardcoded as "test-token" in `src/routes/proxy.rs:11`
 - **Basic error handling**: Error responses are passed through without detailed transformation
 
 ### Environment Variables
@@ -94,3 +92,7 @@ Since this is a Cloudflare Worker, testing should focus on:
 - `serde`/`serde_json`: JSON serialization/deserialization
 - `futures`: Async utilities (prepared for streaming implementation)
 - `bytes`: Byte manipulation utilities
+
+## Development Reminders
+
+- Run cargo format code and clippy fix then cargo test and wrangler deploy when you finish

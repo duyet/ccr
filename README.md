@@ -66,11 +66,6 @@ That's it! Claude Code will now use OpenRouter's models through the CCR proxy.
 
 ## 📥 Installation Options
 
-### Using the Install Script
-```bash
-curl -s https://ccr.duyet.net/install.sh | bash
-```
-
 ### Manual Setup
 1. Add the environment variables to your shell profile:
    ```bash
