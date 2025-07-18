@@ -30,19 +30,34 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
     // Transform to OpenAI format for OpenRouter API
     let openai_request = anthropic_to_openai(&anthropic_request, config)?;
 
-    // Create HTTP client and prepare request to OpenRouter
-    let client = reqwest::Client::new();
+    // Create HTTP client with timeout to prevent hanging
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(60))
+        .build()
+        .map_err(|e| worker::Error::RustError(format!("Failed to create HTTP client: {}", e)))?;
+
     let url = format!("{}/chat/completions", config.openrouter_base_url);
 
-    // Send request to OpenRouter API
+    // Add debug logging
+    web_sys::console::log_1(&format!("Sending request to: {}", url).into());
+    web_sys::console::log_1(&format!("Model: {}", openai_request.model).into());
+
+    // Send request to OpenRouter API with timeout
     let response = client
         .post(&url)
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {}", api_key))
+        .header("HTTP-Referer", "https://ccr.duyet.net")
+        .header("X-Title", "CCR - Claude Code Router")
         .json(&openai_request)
         .send()
         .await
-        .map_err(|e| worker::Error::RustError(format!("Request failed: {}", e)))?;
+        .map_err(|e| {
+            web_sys::console::log_1(&format!("Request error: {}", e).into());
+            worker::Error::RustError(format!("Request failed: {}", e))
+        })?;
+
+    web_sys::console::log_1(&format!("Response status: {}", response.status()).into());
 
     // Handle error responses from OpenRouter
     if !response.status().is_success() {
