@@ -15,7 +15,10 @@ pub async fn home() -> Result<Response> {
         <div class="max-w-4xl mx-auto">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
                 <h1 class="text-3xl font-bold text-gray-900 mb-4">CCR - Claude Code Router</h1>
-                <p class="text-lg text-gray-600 mb-8">A seamless proxy enabling Claude Code to work with OpenRouter's diverse model selection</p>
+                <p class="text-lg text-gray-600 mb-4">A seamless proxy enabling Claude Code to work with OpenRouter's diverse model selection</p>
+                <p class="text-sm text-blue-600 mb-8">
+                    <strong>Built entirely with <a href="https://claude.ai/code" target="_blank" class="underline hover:text-blue-800">Claude Code</a></strong> - Showcasing AI-powered development workflow
+                </p>
                 
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
                     <h2 class="font-semibold text-gray-900 mb-4">What is CCR?</h2>
@@ -145,13 +148,16 @@ claude</pre>
                 </div>
                 
                 <div class="border-t border-gray-200 pt-8 text-center">
-                    <div class="flex justify-center space-x-4 text-sm text-gray-600">
+                    <div class="flex justify-center space-x-4 text-sm text-gray-600 mb-4">
                         <a href="https://duyet.net" target="_blank" class="hover:text-blue-600">duyet.net</a>
                         <span>•</span>
                         <a href="/terms" class="hover:text-blue-600">Terms</a>
                         <span>•</span>
                         <a href="/privacy" class="hover:text-blue-600">Privacy</a>
                     </div>
+                    <p class="text-xs text-gray-500">
+                        Built entirely with <a href="https://claude.ai/code" target="_blank" class="text-blue-600 hover:text-blue-800">Claude Code</a> - Showcasing AI-powered development workflow
+                    </p>
                 </div>
             </div>
         </div>

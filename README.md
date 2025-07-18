@@ -1,5 +1,7 @@
 # CCR (Claude Code Router)
 
+> **Built entirely with [Claude Code](https://claude.ai/code)** - An AI-powered development workflow
+
 A Cloudflare Worker proxy that enables **Claude Code** to access OpenRouter's diverse model selection. CCR acts as a translation layer between Anthropic's Claude API format and OpenAI-compatible APIs.
 
 ## 🚀 What is CCR?
@@ -204,3 +206,7 @@ Error: Connection timeout or malformed events
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+**Built entirely with [Claude Code](https://claude.ai/code)** - Showcasing AI-powered development workflow
