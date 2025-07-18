@@ -30,11 +30,8 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
     // Transform to OpenAI format for OpenRouter API
     let openai_request = anthropic_to_openai(&anthropic_request, config)?;
 
-    // Create HTTP client with timeout to prevent hanging
-    let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(60))
-        .build()
-        .map_err(|e| worker::Error::RustError(format!("Failed to create HTTP client: {}", e)))?;
+    // Create HTTP client (timeout handled by Cloudflare Workers runtime)
+    let client = reqwest::Client::new();
 
     let url = format!("{}/chat/completions", config.openrouter_base_url);
 
