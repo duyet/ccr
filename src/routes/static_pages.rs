@@ -144,14 +144,14 @@ claude</pre>
                     </a>
                 </div>
                 
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">📋 Legal & Support</h2>
-                <div class="flex flex-wrap gap-3 mb-8">
-                    <a href="/terms" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">📋 Terms of Service</a>
-                    <a href="/privacy" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">🔒 Privacy Policy</a>
-                </div>
-
                 <div class="border-t border-gray-200 pt-8 text-center">
-                    <p class="text-gray-600">CCR - Claude Code Router | Built with ❤️ using Rust & Cloudflare Workers</p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-600">
+                        <a href="https://duyet.net" target="_blank" class="hover:text-blue-600">duyet.net</a>
+                        <span>•</span>
+                        <a href="/terms" class="hover:text-blue-600">Terms</a>
+                        <span>•</span>
+                        <a href="/privacy" class="hover:text-blue-600">Privacy</a>
+                    </div>
                 </div>
             </div>
         </div>
