@@ -30,13 +30,20 @@ Sign up at [openrouter.ai](https://openrouter.ai) and get your API key
 
 #### Basic Usage
 ```bash
+# Option 1: Using ANTHROPIC_API_KEY
 ANTHROPIC_BASE_URL="https://ccr.duyet.net" ANTHROPIC_API_KEY="your-openrouter-api-key" claude
+
+# Option 2: Using ANTHROPIC_AUTH_TOKEN (alternative)
+ANTHROPIC_BASE_URL="https://ccr.duyet.net" ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key" claude
 ```
 
 #### With Custom Models
 ```bash
-# With custom model
+# Using ANTHROPIC_API_KEY
 ANTHROPIC_BASE_URL="https://ccr.duyet.net" ANTHROPIC_API_KEY="your-openrouter-api-key" ANTHROPIC_MODEL="moonshotai/kimi-k2:free" ANTHROPIC_SMALL_FAST_MODEL="google/gemini-2.5-flash" claude
+
+# Using ANTHROPIC_AUTH_TOKEN
+ANTHROPIC_BASE_URL="https://ccr.duyet.net" ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key" ANTHROPIC_MODEL="moonshotai/kimi-k2:free" ANTHROPIC_SMALL_FAST_MODEL="google/gemini-2.5-flash" claude
 ```
 
 #### Environment Setup (Optional)
@@ -44,7 +51,11 @@ For permanent setup, add to your shell profile:
 
 ```bash
 export ANTHROPIC_BASE_URL="https://ccr.duyet.net"
+# Choose one of these API key options:
 export ANTHROPIC_API_KEY="your-openrouter-api-key"
+# OR
+export ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key"
+
 # Optional: Set default models
 export ANTHROPIC_MODEL="moonshotai/kimi-k2:free"
 export ANTHROPIC_SMALL_FAST_MODEL="google/gemini-2.5-flash"
@@ -66,7 +77,10 @@ curl -s https://ccr.duyet.net/install.sh | bash
 1. Add the environment variables to your shell profile:
    ```bash
    echo 'export ANTHROPIC_BASE_URL="https://ccr.duyet.net"' >> ~/.bashrc
+   # Choose one:
    echo 'export ANTHROPIC_API_KEY="your-openrouter-api-key"' >> ~/.bashrc
+   # OR
+   echo 'export ANTHROPIC_AUTH_TOKEN="your-openrouter-api-key"' >> ~/.bashrc
    source ~/.bashrc
    ```
 

@@ -9,6 +9,7 @@ mod e2e_tests {
     fn default_config() -> ccr::config::Config {
         ccr::config::Config {
             openrouter_base_url: "https://openrouter.ai/api/v1".to_string(),
+            default_max_tokens: 4096,
         }
     }
 
@@ -59,6 +60,7 @@ mod e2e_tests {
             temperature: Some(0.7),
             tools: None,
             stream: Some(false),
+            max_tokens: None,
         };
 
         // Transform to OpenAI format
@@ -163,6 +165,7 @@ mod e2e_tests {
                 }
             })]),
             stream: Some(false),
+            max_tokens: None,
         };
 
         // Transform to OpenAI format
@@ -225,6 +228,7 @@ mod e2e_tests {
             temperature: None,
             tools: None,
             stream: Some(false),
+            max_tokens: None,
         };
 
         let config = default_config();
@@ -262,6 +266,7 @@ mod e2e_tests {
             temperature: None,
             tools: None,
             stream: Some(true),
+            max_tokens: None,
         };
 
         // This would typically be handled in the proxy route handler
@@ -310,6 +315,7 @@ mod e2e_tests {
                 temperature: None,
                 tools: None,
                 stream: Some(false),
+            max_tokens: None,
             };
 
             let config = default_config();
@@ -354,6 +360,7 @@ mod e2e_tests {
             temperature: Some(0.7),
             tools: None,
             stream: Some(false),
+            max_tokens: None,
         };
 
         let config = default_config();
@@ -405,6 +412,7 @@ mod e2e_tests {
         // Create config pointing to mock server
         let config = ccr::config::Config {
             openrouter_base_url: mock_server.uri(),
+            default_max_tokens: 4096,
         };
 
         // Simulate Claude Code request with x-api-key header
@@ -418,6 +426,7 @@ mod e2e_tests {
             temperature: Some(0.7),
             tools: None,
             stream: Some(false),
+            max_tokens: None,
         };
 
         // Test transformation and HTTP flow
@@ -541,6 +550,7 @@ mod e2e_tests {
                     temperature: Some(0.7),
                     tools: None,
                     stream: Some(false),
+            max_tokens: None,
                 };
 
                 let config = default_config();

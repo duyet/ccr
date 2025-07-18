@@ -62,6 +62,7 @@ mod tests {
     fn default_config() -> Config {
         Config {
             openrouter_base_url: "https://openrouter.ai/api/v1".to_string(),
+            default_max_tokens: 4096,
         }
     }
 

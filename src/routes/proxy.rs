@@ -12,7 +12,11 @@ use worker::{Request, Response, Result};
 /// 4. Transforms response back to Anthropic format
 /// 5. Returns to client
 pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Response> {
-    // Extract API key from x-api-key header (Claude Code format) or Authorization header
+    // Extract API key from multiple possible headers
+    // Claude Code can send API key via different environment variables:
+    // - ANTHROPIC_API_KEY -> x-api-key header
+    // - ANTHROPIC_AUTH_TOKEN -> x-api-key header (alternative)
+    // - Authorization Bearer token (fallback)
     let api_key = if let Some(x_api_key) = req.headers().get("x-api-key")? {
         x_api_key.to_string()
     } else if let Some(auth_header) = req.headers().get("Authorization")? {
@@ -46,6 +50,15 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
         web_sys::console::log_1(&format!("Model: {}", openai_request.model).into());
     }
 
+    // Add more debug logging before sending request
+    #[cfg(target_arch = "wasm32")]
+    {
+        web_sys::console::log_1(&format!("Request URL: {}", url).into());
+        web_sys::console::log_1(&format!("Request model: {}", openai_request.model).into());
+        web_sys::console::log_1(&format!("Request body: {}", serde_json::to_string(&openai_request).unwrap_or_else(|_| "Failed to serialize".to_string())).into());
+        web_sys::console::log_1(&format!("API key length: {}", api_key.len()).into());
+    }
+
     // Send request to OpenRouter API with timeout
     let response = client
         .post(&url)
@@ -71,6 +84,14 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
         let text = response.text().await.map_err(|e| {
             worker::Error::RustError(format!("Failed to read error response: {}", e))
         })?;
+        
+        // Log error details for debugging
+        #[cfg(target_arch = "wasm32")]
+        {
+            web_sys::console::log_1(&format!("OpenRouter error status: {}", status).into());
+            web_sys::console::log_1(&format!("OpenRouter error response: {}", text).into());
+        }
+        
         return Response::error(text, status);
     }
 

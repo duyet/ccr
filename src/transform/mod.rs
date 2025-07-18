@@ -25,12 +25,17 @@ pub fn anthropic_to_openai(req: &AnthropicRequest, config: &Config) -> Result<Op
         messages.push(message.clone());
     }
 
+    // Set reasonable max_tokens default to avoid credit limit issues
+    // If user specified max_tokens, respect it; otherwise use config default
+    let max_tokens = req.max_tokens.or(Some(config.default_max_tokens));
+
     Ok(OpenAIRequest {
         model: map_model(&req.model, config),
         messages,
         temperature: req.temperature,
         tools: req.tools.clone(),
         stream: req.stream,
+        max_tokens,
     })
 }
 
@@ -407,6 +412,7 @@ mod tests {
     fn default_config() -> Config {
         Config {
             openrouter_base_url: "https://openrouter.ai/api/v1".to_string(),
+            default_max_tokens: 4096,
         }
     }
 
@@ -423,6 +429,7 @@ mod tests {
             temperature: Some(0.7),
             tools: None,
             stream: Some(false),
+            max_tokens: None,
         };
 
         let result = anthropic_to_openai(&anthropic_req, &config).unwrap();
@@ -446,6 +453,7 @@ mod tests {
             temperature: None,
             tools: None,
             stream: None,
+            max_tokens: None,
         };
 
         let result = anthropic_to_openai(&anthropic_req, &config).unwrap();
@@ -478,6 +486,7 @@ mod tests {
             temperature: Some(0.5),
             tools: Some(tools.clone()),
             stream: Some(false),
+            max_tokens: None,
         };
 
         let result = anthropic_to_openai(&anthropic_req, &config).unwrap();
