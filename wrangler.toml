@@ -3,8 +3,14 @@ main = "build/worker/shim.mjs"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
+routes = [{ pattern = "ccr.duyet.net", custom_domain = true }]
+
 [build]
 command = "cargo install worker-build && worker-build --release"
+
+# https://developers.cloudflare.com/workers/configuration/smart-placement/
+[placement]
+mode = "smart"
 
 # Enable logging
 [observability]

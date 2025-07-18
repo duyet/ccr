@@ -6,6 +6,12 @@ use wiremock::{Mock, MockServer, ResponseTemplate};
 mod e2e_tests {
     use super::*;
 
+    fn default_config() -> ccr::config::Config {
+        ccr::config::Config {
+            openrouter_base_url: "https://openrouter.ai/api/v1".to_string(),
+        }
+    }
+
     // Note: These E2E tests use wiremock to simulate the OpenRouter API
     // In a real deployment, you would test against a staging environment
     // or use wrangler dev with environment variables
@@ -56,7 +62,8 @@ mod e2e_tests {
         };
 
         // Transform to OpenAI format
-        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request).unwrap();
+        let config = default_config();
+        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
 
         // Verify transformation
         assert_eq!(openai_request.model, "anthropic/claude-sonnet-4");
@@ -159,7 +166,8 @@ mod e2e_tests {
         };
 
         // Transform to OpenAI format
-        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request).unwrap();
+        let config = default_config();
+        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
 
         // Verify tools are included
         assert!(openai_request.tools.is_some());
@@ -219,7 +227,8 @@ mod e2e_tests {
             stream: Some(false),
         };
 
-        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request).unwrap();
+        let config = default_config();
+        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
 
         // Simulate API call with invalid key
         let client = reqwest::Client::new();
@@ -303,7 +312,8 @@ mod e2e_tests {
                 stream: Some(false),
             };
 
-            let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request).unwrap();
+            let config = default_config();
+        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
             assert_eq!(openai_request.model, expected_openai_model);
         }
     }
@@ -346,7 +356,8 @@ mod e2e_tests {
             stream: Some(false),
         };
 
-        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request).unwrap();
+        let config = default_config();
+        let openai_request = ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
 
         // Verify the transformation handles large content
         assert_eq!(openai_request.messages.len(), 1);
@@ -400,8 +411,9 @@ mod e2e_tests {
                     stream: Some(false),
                 };
 
+                let config = default_config();
                 let openai_request =
-                    ccr::transform::anthropic_to_openai(&anthropic_request).unwrap();
+                    ccr::transform::anthropic_to_openai(&anthropic_request, &config).unwrap();
 
                 let client = reqwest::Client::new();
                 let response = client

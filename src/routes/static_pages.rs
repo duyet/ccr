@@ -18,10 +18,33 @@ pub async fn home() -> Result<Response> {
                 <p class="text-lg text-gray-600 mb-8">A seamless proxy enabling Claude Code to work with OpenRouter's diverse model selection</p>
                 
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-                    <h2 class="font-semibold text-gray-900 mb-2">What is CCR?</h2>
-                    <p class="text-gray-700">
+                    <h2 class="font-semibold text-gray-900 mb-4">What is CCR?</h2>
+                    <p class="text-gray-700 mb-6">
                         This Cloudflare Worker acts as a translation layer between Anthropic's Claude API format and OpenAI-compatible APIs, specifically OpenRouter. It allows Claude Code to access a wide range of models through OpenRouter while maintaining the familiar Claude API interface.
                     </p>
+                    
+                    <div class="bg-white border border-gray-300 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 mb-3 text-center">🔄 How CCR Works</h3>
+                        <pre class="text-sm text-gray-800 font-mono leading-relaxed overflow-x-auto">
+┌───────────────────┐     ┌───────────────────┐     ┌───────────────────┐
+│   Claude Code     │────▶│       CCR         │────▶│   OpenRouter      │
+│                   │     │                   │     │                   │
+│ ANTHROPIC_BASE_   │     │ API Format        │     │ Multiple Models:  │
+│ URL="ccr.duyet.   │     │ Translation       │     │                   │
+│ net"              │     │                   │     │ • Anthropic       │
+│                   │     │ Model Pass-       │     │ • OpenAI          │
+│ ANTHROPIC_API_    │     │ through or        │     │ • Moonshot        │
+│ KEY="your-open    │     │ Mapping           │     │ • Google          │
+│ router-api-key"   │     │                   │     │ • Meta            │
+│                   │     │                   │     │ • DeepSeek        │
+│ ANTHROPIC_MODEL=  │     │                   │     │ • & More...       │
+│ "kimi-k2"         │     │                   │     │                   │
+│                   │◀────│                   │◀────│                   │
+│ Anthropic Format  │     │                   │     │                   │
+└───────────────────┘     └───────────────────┘     └───────────────────┘
+
+</pre>
+                    </div>
                 </div>
 
                 <div class="grid md:grid-cols-3 gap-6 mb-8">
@@ -44,24 +67,37 @@ pub async fn home() -> Result<Response> {
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">1</div>
                         <div>
+                            <h3 class="font-semibold text-gray-900">Set up Claude Code</h3>
+                            <p class="text-gray-600 mb-2"><a href="https://docs.anthropic.com/en/docs/claude-code/setup" class="text-blue-600 hover:text-blue-800">Claude Code Setup Guide</a></p>
+                            <pre class="bg-gray-800 text-gray-100 p-2 rounded text-sm">npm install -g @anthropic-ai/claude-code</pre>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">2</div>
+                        <div>
                             <h3 class="font-semibold text-gray-900">Get OpenRouter API Key</h3>
                             <p class="text-gray-600">Sign up at <a href="https://openrouter.ai" class="text-blue-600 hover:text-blue-800">openrouter.ai</a> and get your API key</p>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">2</div>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-gray-900">Set Environment Variables</h3>
-                            <p class="text-gray-600 mb-2">Configure your shell with the following variables:</p>
-                            <pre class="bg-gray-800 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">export ANTHROPIC_BASE_URL="https://ccr.duyet.net"
-export ANTHROPIC_API_KEY="your-openrouter-api-key"</pre>
-                        </div>
-                    </div>
-                    <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">3</div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900">Reload Shell & Start Claude</h3>
-                            <p class="text-gray-600">Run <code class="bg-gray-100 px-2 py-1 rounded text-sm">source ~/.bashrc</code> (or <code class="bg-gray-100 px-2 py-1 rounded text-sm">~/.zshrc</code>) then <code class="bg-gray-100 px-2 py-1 rounded text-sm">claude</code></p>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900">Using Claude Code with CCR</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-2">Basic Usage</h4>
+                                    <pre class="bg-gray-800 text-gray-100 p-3 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap break-all">ANTHROPIC_BASE_URL="https://ccr.duyet.net" \
+ANTHROPIC_API_KEY="your-openrouter-api-key" \
+claude</pre>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-2">With Custom Models</h4>
+                                    <pre class="bg-gray-800 text-gray-100 p-3 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap break-all">ANTHROPIC_BASE_URL="https://ccr.duyet.net" \
+ANTHROPIC_API_KEY="your-openrouter-api-key" \
+ANTHROPIC_MODEL="moonshotai/kimi-k2:free" \
+claude</pre>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -72,9 +108,33 @@ export ANTHROPIC_API_KEY="your-openrouter-api-key"</pre>
                     </p>
                 </div>
 
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">📥 Installation Options</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">🚀 Quick Actions</h2>
+                <div class="grid sm:grid-cols-3 gap-4 mb-8">
+                    <a href="/install.sh" class="group bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        <div class="text-center">
+                            <div class="text-3xl mb-3">🚀</div>
+                            <h3 class="font-bold text-lg mb-2">Install Script</h3>
+                            <p class="text-blue-100 text-sm">One-click setup with automated environment configuration</p>
+                        </div>
+                    </a>
+                    <a href="https://docs.anthropic.com/en/docs/claude-code/setup" target="_blank" class="group bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        <div class="text-center">
+                            <div class="text-3xl mb-3">📚</div>
+                            <h3 class="font-bold text-lg mb-2">Claude Code Guide</h3>
+                            <p class="text-green-100 text-sm">Official setup documentation and getting started guide</p>
+                        </div>
+                    </a>
+                    <a href="https://openrouter.ai" target="_blank" class="group bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        <div class="text-center">
+                            <div class="text-3xl mb-3">🔑</div>
+                            <h3 class="font-bold text-lg mb-2">Get API Key</h3>
+                            <p class="text-purple-100 text-sm">Sign up for OpenRouter and get your API key</p>
+                        </div>
+                    </a>
+                </div>
+                
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">📋 Legal & Support</h2>
                 <div class="flex flex-wrap gap-3 mb-8">
-                    <a href="/install.sh" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">📜 Download Install Script</a>
                     <a href="/terms" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">📋 Terms of Service</a>
                     <a href="/privacy" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">🔒 Privacy Policy</a>
                 </div>

@@ -12,14 +12,23 @@ use worker::{Request, Response, Result};
 /// 4. Transforms response back to Anthropic format
 /// 5. Returns to client
 pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Response> {
+    // Extract API key from x-api-key header (Claude Code format) or Authorization header
+    let api_key = if let Some(x_api_key) = req.headers().get("x-api-key")? {
+        x_api_key.to_string()
+    } else if let Some(auth_header) = req.headers().get("Authorization")? {
+        auth_header
+            .strip_prefix("Bearer ")
+            .ok_or_else(|| worker::Error::RustError("Invalid Authorization header format".to_string()))?
+            .to_string()
+    } else {
+        return Response::error("No API key found in x-api-key or Authorization header", 401);
+    };
+
     // Parse incoming Anthropic-formatted request
     let anthropic_request: AnthropicRequest = req.json().await?;
 
     // Transform to OpenAI format for OpenRouter API
-    let openai_request = anthropic_to_openai(&anthropic_request)?;
-
-    // TODO: Replace with proper authentication from environment or request header
-    let bearer_token = "test-token".to_string();
+    let openai_request = anthropic_to_openai(&anthropic_request, config)?;
 
     // Create HTTP client and prepare request to OpenRouter
     let client = reqwest::Client::new();
@@ -29,7 +38,7 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
     let response = client
         .post(&url)
         .header("Content-Type", "application/json")
-        .header("Authorization", format!("Bearer {}", bearer_token))
+        .header("Authorization", format!("Bearer {}", api_key))
         .json(&openai_request)
         .send()
         .await

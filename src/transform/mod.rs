@@ -1,5 +1,6 @@
 use crate::models::{AnthropicRequest, AnthropicResponse, OpenAIRequest};
 use crate::utils::map_model;
+use crate::config::Config;
 use worker::Result;
 
 /// Transforms an Anthropic API request to OpenAI API format
@@ -8,7 +9,7 @@ use worker::Result;
 /// - Converting system messages to OpenAI format
 /// - Mapping Claude model names to OpenRouter model IDs
 /// - Preserving message structure and optional parameters
-pub fn anthropic_to_openai(req: &AnthropicRequest) -> Result<OpenAIRequest> {
+pub fn anthropic_to_openai(req: &AnthropicRequest, config: &Config) -> Result<OpenAIRequest> {
     let mut messages = Vec::new();
 
     // Add system message if present (OpenAI format uses system role)
@@ -25,7 +26,7 @@ pub fn anthropic_to_openai(req: &AnthropicRequest) -> Result<OpenAIRequest> {
     }
 
     Ok(OpenAIRequest {
-        model: map_model(&req.model),
+        model: map_model(&req.model, config),
         messages,
         temperature: req.temperature,
         tools: req.tools.clone(),
@@ -403,8 +404,15 @@ mod tests {
     use super::*;
     use serde_json::json;
 
+    fn default_config() -> Config {
+        Config {
+            openrouter_base_url: "https://openrouter.ai/api/v1".to_string(),
+        }
+    }
+
     #[test]
     fn test_anthropic_to_openai_basic() {
+        let config = default_config();
         let anthropic_req = AnthropicRequest {
             model: "claude-3-sonnet-20240229".to_string(),
             messages: vec![json!({
@@ -417,7 +425,7 @@ mod tests {
             stream: Some(false),
         };
 
-        let result = anthropic_to_openai(&anthropic_req).unwrap();
+        let result = anthropic_to_openai(&anthropic_req, &config).unwrap();
 
         assert_eq!(result.model, "anthropic/claude-sonnet-4");
         assert_eq!(result.messages.len(), 1);
@@ -427,6 +435,7 @@ mod tests {
 
     #[test]
     fn test_anthropic_to_openai_with_system() {
+        let config = default_config();
         let anthropic_req = AnthropicRequest {
             model: "claude-3-haiku-20240307".to_string(),
             messages: vec![json!({
@@ -439,7 +448,7 @@ mod tests {
             stream: None,
         };
 
-        let result = anthropic_to_openai(&anthropic_req).unwrap();
+        let result = anthropic_to_openai(&anthropic_req, &config).unwrap();
 
         assert_eq!(result.model, "anthropic/claude-3.5-haiku");
         assert_eq!(result.messages.len(), 2);
@@ -450,6 +459,7 @@ mod tests {
 
     #[test]
     fn test_anthropic_to_openai_with_tools() {
+        let config = default_config();
         let tools = vec![json!({
             "type": "function",
             "function": {
@@ -470,7 +480,7 @@ mod tests {
             stream: Some(false),
         };
 
-        let result = anthropic_to_openai(&anthropic_req).unwrap();
+        let result = anthropic_to_openai(&anthropic_req, &config).unwrap();
 
         assert_eq!(result.model, "anthropic/claude-opus-4");
         assert_eq!(result.tools, Some(tools));
