@@ -26,6 +26,10 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
 
     // Parse incoming Anthropic-formatted request
     let anthropic_request: AnthropicRequest = req.json().await?;
+    
+    // Debug: Log the received model name (only in WASM environment)
+    #[cfg(target_arch = "wasm32")]
+    web_sys::console::log_1(&format!("Received model from Claude Code: {}", anthropic_request.model).into());
 
     // Transform to OpenAI format for OpenRouter API
     let openai_request = anthropic_to_openai(&anthropic_request, config)?;
@@ -35,9 +39,12 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
 
     let url = format!("{}/chat/completions", config.openrouter_base_url);
 
-    // Add debug logging
-    web_sys::console::log_1(&format!("Sending request to: {}", url).into());
-    web_sys::console::log_1(&format!("Model: {}", openai_request.model).into());
+    // Add debug logging (only in WASM environment)
+    #[cfg(target_arch = "wasm32")]
+    {
+        web_sys::console::log_1(&format!("Sending request to: {}", url).into());
+        web_sys::console::log_1(&format!("Model: {}", openai_request.model).into());
+    }
 
     // Send request to OpenRouter API with timeout
     let response = client
@@ -50,10 +57,12 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
         .send()
         .await
         .map_err(|e| {
+            #[cfg(target_arch = "wasm32")]
             web_sys::console::log_1(&format!("Request error: {}", e).into());
             worker::Error::RustError(format!("Request failed: {}", e))
         })?;
 
+    #[cfg(target_arch = "wasm32")]
     web_sys::console::log_1(&format!("Response status: {}", response.status()).into());
 
     // Handle error responses from OpenRouter
