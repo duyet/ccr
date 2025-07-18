@@ -63,7 +63,7 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
     let response = client
         .post(&url)
         .header("Content-Type", "application/json")
-        .header("Authorization", format!("Bearer {}", api_key))
+        .header("Authorization", format!("Bearer {api_key}"))
         .header("HTTP-Referer", "https://ccr.duyet.net")
         .header("X-Title", "CCR - Claude Code Router")
         .json(&openai_request)
@@ -72,7 +72,7 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
         .map_err(|e| {
             #[cfg(target_arch = "wasm32")]
             web_sys::console::log_1(&format!("Request error: {}", e).into());
-            worker::Error::RustError(format!("Request failed: {}", e))
+            worker::Error::RustError(format!("Request failed: {e}"))
         })?;
 
     #[cfg(target_arch = "wasm32")]
@@ -82,7 +82,7 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
     if !response.status().is_success() {
         let status = response.status().as_u16();
         let text = response.text().await.map_err(|e| {
-            worker::Error::RustError(format!("Failed to read error response: {}", e))
+            worker::Error::RustError(format!("Failed to read error response: {e}"))
         })?;
         
         // Log error details for debugging
@@ -102,7 +102,7 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
     } else {
         // Parse OpenRouter response
         let openai_response: serde_json::Value = response.json().await.map_err(|e| {
-            worker::Error::RustError(format!("Failed to parse OpenAI response: {}", e))
+            worker::Error::RustError(format!("Failed to parse OpenAI response: {e}"))
         })?;
 
         // Transform back to Anthropic format

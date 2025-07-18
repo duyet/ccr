@@ -559,7 +559,7 @@ mod e2e_tests {
 
                 let client = reqwest::Client::new();
                 let response = client
-                    .post(format!("{}/chat/completions", mock_uri))
+                    .post(format!("{mock_uri}/chat/completions"))
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer test-token")
                     .json(&openai_request)

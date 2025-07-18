@@ -264,9 +264,9 @@ async fn format_streaming_response(
 /// Formats Server-Sent Event
 fn format_sse_event<T: serde::Serialize>(event_type: &str, data: &T) -> Result<String> {
     let json_data = serde_json::to_string(data)
-        .map_err(|e| worker::Error::RustError(format!("JSON serialization error: {}", e)))?;
+        .map_err(|e| worker::Error::RustError(format!("JSON serialization error: {e}")))?;
 
-    Ok(format!("event: {}\ndata: {}\n\n", event_type, json_data))
+    Ok(format!("event: {event_type}\ndata: {json_data}\n\n"))
 }
 
 /// Processes streaming delta from OpenAI and generates Anthropic events
