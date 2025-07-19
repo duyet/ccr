@@ -26,7 +26,6 @@ pub fn anthropic_to_openai(req: &AnthropicRequest, config: &Config) -> Result<Op
 
     // Convert messages from Anthropic format to OpenAI format
     for message in req.messages.iter() {
-
         let mut openai_message = serde_json::Map::new();
 
         // Copy role
@@ -46,7 +45,7 @@ pub fn anthropic_to_openai(req: &AnthropicRequest, config: &Config) -> Result<Op
                         }
                     }
                 }
-                
+
                 openai_message.insert(
                     "content".to_string(),
                     serde_json::Value::String(text_content),
@@ -103,18 +102,21 @@ pub fn openai_to_anthropic(response: &serde_json::Value, model: &str) -> Result<
         "msg_{}",
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .map_err(|e| worker::Error::RustError(format!("Time error: {}", e)))?
+            .map_err(|e| worker::Error::RustError(format!("Time error: {e}")))?
             .as_millis()
     );
 
     // Safe array access with bounds checking
-    let choices = response["choices"].as_array()
+    let choices = response["choices"]
+        .as_array()
         .ok_or_else(|| worker::Error::RustError("Response missing choices array".to_string()))?;
-    
+
     if choices.is_empty() {
-        return Err(worker::Error::RustError("Response has empty choices array".to_string()));
+        return Err(worker::Error::RustError(
+            "Response has empty choices array".to_string(),
+        ));
     }
-    
+
     let choice = choices[0].clone();
     let message = choice["message"].clone();
 
@@ -195,7 +197,7 @@ pub async fn stream_openai_to_anthropic(
         "msg_{}",
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .map_err(|e| worker::Error::RustError(format!("Time error: {}", e)))?
+            .map_err(|e| worker::Error::RustError(format!("Time error: {e}")))?
             .as_millis()
     );
 

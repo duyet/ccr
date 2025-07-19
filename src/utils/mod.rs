@@ -25,7 +25,9 @@ pub fn map_model(anthropic_model: &str, _config: &Config) -> String {
 
     // Map common Claude short names to full OpenRouter model IDs
     // Only match exact names or standard Claude model patterns
-    let result = if model_lower == "haiku"
+    
+
+    if model_lower == "haiku"
         || model_lower.starts_with("claude-3") && model_lower.contains("haiku")
     {
         "anthropic/claude-3.5-haiku".to_string()
@@ -41,9 +43,7 @@ pub fn map_model(anthropic_model: &str, _config: &Config) -> String {
     } else {
         // Return unknown models unchanged - Claude Code will set ANTHROPIC_MODEL
         anthropic_model.to_string()
-    };
-
-    result
+    }
 }
 
 #[cfg(test)]

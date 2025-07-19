@@ -388,4 +388,3 @@ pub async fn privacy() -> Result<Response> {
 
     Response::from_html(html)
 }
-
