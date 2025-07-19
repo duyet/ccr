@@ -46,17 +46,34 @@ pub fn anthropic_to_openai(req: &AnthropicRequest, config: &Config) -> Result<Op
                     }
                 }
 
+                // Ensure content is not empty - OpenRouter rejects empty content
+                if text_content.is_empty() {
+                    text_content = " ".to_string(); // Use single space as fallback
+                }
+
                 openai_message.insert(
                     "content".to_string(),
                     serde_json::Value::String(text_content),
                 );
             } else if let Some(content_str) = content.as_str() {
-                // Already a string, use as-is
+                // Already a string, use as-is but ensure it's not empty
+                let final_content = if content_str.trim().is_empty() {
+                    " ".to_string() // Use single space as fallback for empty strings
+                } else {
+                    content_str.to_string()
+                };
+                
                 openai_message.insert(
                     "content".to_string(),
-                    serde_json::Value::String(content_str.to_string()),
+                    serde_json::Value::String(final_content),
                 );
             }
+        } else {
+            // If no content field exists, add minimal content to prevent 400 error
+            openai_message.insert(
+                "content".to_string(),
+                serde_json::Value::String(" ".to_string()),
+            );
         }
 
         let converted_message = serde_json::Value::Object(openai_message);
