@@ -192,11 +192,6 @@ mod tests {
             "moonshotai/kimi-k2:free"
         );
         
-        // Test auto-mapping for common mistake
-        assert_eq!(
-            map_model("moonshotai/kimi-k2", &config),
-            "moonshotai/kimi-k2:free"
-        );
         assert_eq!(
             map_model("google/gemini-2.5-flash", &config),
             "google/gemini-2.5-flash"

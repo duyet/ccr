@@ -75,9 +75,16 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
 
     let url = format!("{}/chat/completions", config.openrouter_base_url);
 
-    // Minimal debug logging
+    // Debug logging for troubleshooting
     #[cfg(target_arch = "wasm32")]
     web_sys::console::log_1(&format!("→ OpenRouter: {}", openai_request.model).into());
+
+    // Add detailed request logging for debugging
+    #[cfg(target_arch = "wasm32")]
+    {
+        let request_json = serde_json::to_string_pretty(&openai_request).unwrap_or_else(|_| "[failed to serialize]".to_string());
+        web_sys::console::log_1(&format!("🔍 Request JSON: {}", request_json).into());
+    }
 
     // Send request to OpenRouter API with timeout
     let _elapsed = check_time("HTTP request start");
