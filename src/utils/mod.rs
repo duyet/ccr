@@ -25,7 +25,6 @@ pub fn map_model(anthropic_model: &str, _config: &Config) -> String {
 
     // Map common Claude short names to full OpenRouter model IDs
     // Only match exact names or standard Claude model patterns
-    
 
     if model_lower == "haiku"
         || model_lower.starts_with("claude-3") && model_lower.contains("haiku")
@@ -191,7 +190,7 @@ mod tests {
             map_model("moonshotai/kimi-k2:free", &config),
             "moonshotai/kimi-k2:free"
         );
-        
+
         assert_eq!(
             map_model("google/gemini-2.5-flash", &config),
             "google/gemini-2.5-flash"

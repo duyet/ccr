@@ -11,54 +11,62 @@ fn apply_model_specific_transforms(
     max_tokens: Option<u32>,
     tools: &Option<Vec<serde_json::Value>>,
     stream: Option<bool>,
-) -> (Option<f32>, Option<u32>, Option<Vec<serde_json::Value>>, Option<bool>) {
+) -> (
+    Option<f32>,
+    Option<u32>,
+    Option<Vec<serde_json::Value>>,
+    Option<bool>,
+) {
     match model {
         // MoonshotAI models (like Kimi K2) have specific requirements
         model_name if model_name.starts_with("moonshotai/") => {
             // Based on claude-code-router config: moonshotai models work better with specific settings
             let adjusted_temp = temperature.map(|t| (t * 0.6).min(1.0));
-            
-            // MoonshotAI models might not support all tool formats - simplify if needed
-            let adjusted_tools = tools.clone(); // Keep tools for now, can filter later if needed
-            
+
+            // MoonshotAI models don't support complex tools or cache_control - disable them for now
+            let adjusted_tools = None; // Disable tools to avoid cache_control issues
+
             // Set reasonable max_tokens for moonshotai models if not specified
             let adjusted_max_tokens = max_tokens.or(Some(16384)); // Based on their config
-            
+
             // MoonshotAI supports streaming
             let adjusted_stream = stream;
-            
-            (adjusted_temp, adjusted_max_tokens, adjusted_tools, adjusted_stream)
-        },
-        
+
+            (
+                adjusted_temp,
+                adjusted_max_tokens,
+                adjusted_tools,
+                adjusted_stream,
+            )
+        }
+
         // DeepSeek models
         model_name if model_name.starts_with("deepseek/") || model_name.contains("deepseek") => {
             // DeepSeek models prefer lower temperature
             let adjusted_temp = temperature.map(|t| (t * 0.8).min(1.0));
             (adjusted_temp, max_tokens, tools.clone(), stream)
-        },
-        
+        }
+
         // Anthropic Claude models (native)
         model_name if model_name.starts_with("anthropic/") => {
             // Claude models should work well with original parameters
             (temperature, max_tokens, tools.clone(), stream)
-        },
-        
+        }
+
         // OpenAI models
         model_name if model_name.starts_with("openai/") => {
             // OpenAI models work well with standard parameters
             (temperature, max_tokens, tools.clone(), stream)
-        },
-        
-        // Google models  
+        }
+
+        // Google models
         model_name if model_name.starts_with("google/") => {
             // Google models might have different tool format requirements
             (temperature, max_tokens, tools.clone(), stream)
-        },
-        
-        // Default case - minimal changes
-        _ => {
-            (temperature, max_tokens, tools.clone(), stream)
         }
+
+        // Default case - minimal changes
+        _ => (temperature, max_tokens, tools.clone(), stream),
     }
 }
 
@@ -72,7 +80,8 @@ fn validate_and_clean_request(request: &mut OpenAIRequest) {
                 if let Some(content_str) = content.as_str() {
                     if content_str.trim().is_empty() {
                         // Replace empty content with minimal valid content
-                        *message.get_mut("content").unwrap() = serde_json::Value::String(" ".to_string());
+                        *message.get_mut("content").unwrap() =
+                            serde_json::Value::String(" ".to_string());
                     }
                 }
             }
@@ -80,32 +89,32 @@ fn validate_and_clean_request(request: &mut OpenAIRequest) {
             // Add content field if missing
             message.as_object_mut().unwrap().insert(
                 "content".to_string(),
-                serde_json::Value::String(" ".to_string())
+                serde_json::Value::String(" ".to_string()),
             );
         }
     }
-    
+
     // Model-specific validation
     match request.model.as_str() {
         model if model.starts_with("moonshotai/") => {
             // MoonshotAI models might not support certain parameters
             // Keep basic parameters only if there are issues
-            
+
             // Ensure max_tokens is reasonable
             if let Some(max_tokens) = request.max_tokens {
                 if max_tokens > 32768 {
                     request.max_tokens = Some(16384); // Safe default
                 }
             }
-            
+
             // Validate temperature range
             if let Some(temp) = request.temperature {
-                if temp > 2.0 || temp < 0.0 {
+                if !(0.0..=2.0).contains(&temp) {
                     request.temperature = Some(0.6); // MoonshotAI recommended value
                 }
             }
-        },
-        
+        }
+
         model if model.starts_with("deepseek/") => {
             // DeepSeek specific validations
             if let Some(temp) = request.temperature {
@@ -113,12 +122,12 @@ fn validate_and_clean_request(request: &mut OpenAIRequest) {
                     request.temperature = Some(1.0); // DeepSeek works better with lower temps
                 }
             }
-        },
-        
+        }
+
         _ => {
             // General validations for other models
             if let Some(temp) = request.temperature {
-                if temp > 2.0 || temp < 0.0 {
+                if !(0.0..=2.0).contains(&temp) {
                     request.temperature = Some(1.0); // Safe default
                 }
             }
@@ -156,6 +165,9 @@ pub fn anthropic_to_openai(req: &AnthropicRequest, config: &Config) -> Result<Op
             openai_message.insert("role".to_string(), role.clone());
         }
 
+        // Skip cache_control fields that OpenRouter doesn't support
+        // (Claude Code may include these but OpenRouter will reject them)
+
         // Convert content from Anthropic array format to OpenAI string format
         if let Some(content) = message.get("content") {
             if let Some(content_array) = content.as_array() {
@@ -185,7 +197,7 @@ pub fn anthropic_to_openai(req: &AnthropicRequest, config: &Config) -> Result<Op
                 } else {
                     content_str.to_string()
                 };
-                
+
                 openai_message.insert(
                     "content".to_string(),
                     serde_json::Value::String(final_content),
@@ -212,9 +224,35 @@ pub fn anthropic_to_openai(req: &AnthropicRequest, config: &Config) -> Result<Op
     #[cfg(target_arch = "wasm32")]
     web_sys::console::log_1(&format!("→ {}", mapped_model).into());
 
+    // Strip cache_control from tools if present (OpenRouter doesn't support it)
+    let cleaned_tools = req.tools.as_ref().map(|tools| {
+        tools
+            .iter()
+            .map(|tool| {
+                let mut cleaned_tool = tool.clone();
+                if let Some(tool_obj) = cleaned_tool.as_object_mut() {
+                    tool_obj.remove("cache_control");
+                    // Also clean any nested cache_control in input_schema or other fields
+                    if let Some(input_schema) = tool_obj.get_mut("input_schema") {
+                        if let Some(schema_obj) = input_schema.as_object_mut() {
+                            schema_obj.remove("cache_control");
+                        }
+                    }
+                }
+                cleaned_tool
+            })
+            .collect()
+    });
+
     // Apply model-specific transformations (similar to claude-code-router approach)
-    let (adjusted_temperature, adjusted_max_tokens, adjusted_tools, adjusted_stream) = 
-        apply_model_specific_transforms(&mapped_model, req.temperature, max_tokens, &req.tools, req.stream);
+    let (adjusted_temperature, adjusted_max_tokens, adjusted_tools, adjusted_stream) =
+        apply_model_specific_transforms(
+            &mapped_model,
+            req.temperature,
+            max_tokens,
+            &cleaned_tools,
+            req.stream,
+        );
 
     let mut openai_request = OpenAIRequest {
         model: mapped_model.clone(),
@@ -639,6 +677,7 @@ mod tests {
             tools: None,
             stream: Some(false),
             max_tokens: None,
+            cache_control: None,
         };
 
         let result = anthropic_to_openai(&anthropic_req, &config).unwrap();
@@ -663,6 +702,7 @@ mod tests {
             tools: None,
             stream: None,
             max_tokens: None,
+            cache_control: None,
         };
 
         let result = anthropic_to_openai(&anthropic_req, &config).unwrap();
@@ -696,6 +736,7 @@ mod tests {
             tools: Some(tools.clone()),
             stream: Some(false),
             max_tokens: None,
+            cache_control: None,
         };
 
         let result = anthropic_to_openai(&anthropic_req, &config).unwrap();

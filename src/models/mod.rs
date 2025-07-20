@@ -9,6 +9,9 @@ pub struct AnthropicRequest {
     pub tools: Option<Vec<serde_json::Value>>,
     pub stream: Option<bool>,
     pub max_tokens: Option<u32>,
+    // Capture but ignore cache_control fields that OpenRouter doesn't support
+    #[serde(skip_serializing)]
+    pub cache_control: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

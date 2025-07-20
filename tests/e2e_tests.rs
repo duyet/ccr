@@ -61,6 +61,7 @@ mod e2e_tests {
             tools: None,
             stream: Some(false),
             max_tokens: None,
+            cache_control: None,
         };
 
         // Transform to OpenAI format
@@ -167,6 +168,7 @@ mod e2e_tests {
             })]),
             stream: Some(false),
             max_tokens: None,
+            cache_control: None,
         };
 
         // Transform to OpenAI format
@@ -231,6 +233,7 @@ mod e2e_tests {
             tools: None,
             stream: Some(false),
             max_tokens: None,
+            cache_control: None,
         };
 
         let config = default_config();
@@ -270,6 +273,7 @@ mod e2e_tests {
             tools: None,
             stream: Some(true),
             max_tokens: None,
+            cache_control: None,
         };
 
         // This would typically be handled in the proxy route handler
@@ -319,6 +323,7 @@ mod e2e_tests {
                 tools: None,
                 stream: Some(false),
                 max_tokens: None,
+            cache_control: None,
             };
 
             let config = default_config();
@@ -365,6 +370,7 @@ mod e2e_tests {
             tools: None,
             stream: Some(false),
             max_tokens: None,
+            cache_control: None,
         };
 
         let config = default_config();
@@ -432,6 +438,7 @@ mod e2e_tests {
             tools: None,
             stream: Some(false),
             max_tokens: None,
+            cache_control: None,
         };
 
         // Test transformation and HTTP flow
@@ -564,6 +571,7 @@ mod e2e_tests {
                     tools: None,
                     stream: Some(false),
                     max_tokens: None,
+            cache_control: None,
                 };
 
                 let config = default_config();

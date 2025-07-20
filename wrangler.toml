@@ -22,3 +22,11 @@ head_sampling_rate = 1
 [vars]
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 DEFAULT_MAX_TOKENS = "4096"
+# OPENROUTER_API_KEY = "your-openrouter-api-key-here"  # Set via wrangler secret
+
+# Local development environment variables
+[env.local.vars]
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+DEFAULT_MAX_TOKENS = "4096"
+# For local dev, you can set OPENROUTER_API_KEY here temporarily
+# OPENROUTER_API_KEY = "your-openrouter-api-key-here"

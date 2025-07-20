@@ -82,8 +82,12 @@ pub async fn handle_messages(mut req: Request, config: &Config) -> Result<Respon
     // Add detailed request logging for debugging
     #[cfg(target_arch = "wasm32")]
     {
-        let request_json = serde_json::to_string_pretty(&openai_request).unwrap_or_else(|_| "[failed to serialize]".to_string());
+        let request_json = serde_json::to_string_pretty(&openai_request)
+            .unwrap_or_else(|_| "[failed to serialize]".to_string());
         web_sys::console::log_1(&format!("🔍 Request JSON: {}", request_json).into());
+        web_sys::console::log_1(
+            &format!("🔑 API Key: {}...", &api_key[..15.min(api_key.len())]).into(),
+        );
     }
 
     // Send request to OpenRouter API with timeout
@@ -247,8 +251,7 @@ fn transform_openrouter_error(
             // Additional details or validation errors
             if let Some(details) = error_obj.get("details") {
                 if let Some(details_str) = details.as_str() {
-                    comprehensive_message
-                        .push_str(&format!("Additional Details: {details_str}\n"));
+                    comprehensive_message.push_str(&format!("Additional Details: {details_str}\n"));
                 } else if details.is_object() || details.is_array() {
                     comprehensive_message.push_str(&format!(
                         "Validation Details: {}\n",
